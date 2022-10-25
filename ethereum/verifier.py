@@ -160,6 +160,7 @@ def manticore_verifier(
         contract_name=contract_name,
         compile_args=compile_args,
         name="contract_account",
+        args=None,
     )
     # the address used for checking porperties
     checker_account = m.create_account(balance=10**10, address=psender, name="psender")
