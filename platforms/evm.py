@@ -3010,18 +3010,7 @@ class EVMWorld(Platform):
         if block_reward is None:
             block_reward = 2000000000000000000  # 2 eth
         self.add_to_balance(self.block_coinbase(), block_reward)
-        self._block_header = BlockHeader(self.block_number+1,
-                                self.block_timestamp()+1, #FIXME?
-                                self.block_difficulty(),
-                                self.block_gaslimit(),
-                                self.block_coinbase()) 
-
-    def advance_block_number(self,ammount):
-        self._block_header = BlockHeader(self.block_number()+ammount,
-                                self.block_timestamp(),
-                                self.block_difficulty(),
-                                self.block_gaslimit(),
-                                self.block_coinbase())         
+        # self._block_header = None
 
     def block_coinbase(self):
         return self._block_header.coinbase
