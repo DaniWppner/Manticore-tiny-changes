@@ -1584,13 +1584,14 @@ class ManticoreEVM(ManticoreBase):
             m.generate_testcase(state, 'balance CAN be 0', only_if=balance == 0)
             # testcase generated with an input that will violate invariant (make balance == 0)
         """
-        try:
-            with state as temp_state:
-                if only_if is not None:
-                    temp_state.constrain(only_if)
-                return self._generate_testcase_ex(temp_state, message, name=name)
-        except ManticoreError:
-            return None
+        #try:
+        with state as temp_state:
+            if only_if is not None:
+                temp_state.constrain(only_if)
+            return self._generate_testcase_ex(temp_state, message, name=name)
+        #except ManticoreError:
+            #return None
+
 
     def _generate_testcase_ex(self, state, message="", name="user"):
         """
@@ -1664,6 +1665,8 @@ class ManticoreEVM(ManticoreBase):
                 stream.write(
                     "\n\n(*) Example solution given. Value is symbolic and may take other values\n"
                 )
+
+        print("--------- I'm about to generate concrete transitions")
 
         # Transactions
         with testcase.open_stream("tx") as tx_summary:
