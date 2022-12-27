@@ -394,7 +394,7 @@ class ManticoreBase(Eventful):
         }
         self._daemon_callbacks: typing.List[typing.Callable] = []
 
-        self._snapshot = None
+        self._snapshots = []
         self._main_id = os.getpid(), threading.current_thread().ident
 
     def is_main(self):
@@ -408,37 +408,36 @@ class ManticoreBase(Eventful):
         """Copy/Duplicate/backup all ready states and save it in a snapshot.
         If there is a snapshot already saved it will be overrwritten
         """
-        if self._snapshot is not None:
-            logger.info("Overwriting a snapshot of the ready states")
         snapshot = []
         for state_id in self._ready_states:
             state = self._load(state_id)
             # Re-save the state in case the user changed its data
             snapshot.append(self._save(state))
-        self._snapshot = snapshot
+        self._snapshots.append(snapshot)
 
     @sync
     @only_from_main_script
     def goto_snapshot(self):
         """REMOVE current ready states and replace them with the saved states
         in a snapshot"""
-        if not self._snapshot:
+        if not self._snapshots:
             raise ManticoreError("No snapshot to go to")
+        snapshot = self._snapshots.pop()
         self.clear_ready_states()
-        for state_id in self._snapshot:
+        for state_id in snapshot:
             self._publish("will_enqueue_state", None, can_raise=False)
             self._ready_states.append(state_id)
             self._publish("did_enqueue_state", state_id, can_raise=False)
-        self._snapshot = None
 
     @sync
     @only_from_main_script
-    def clear_snapshot(self):
+    def clear_snapshots(self):
         """Remove any saved states"""
-        if self._snapshot:
-            for state_id in self._snapshot:
-                self._remove(state_id)
-        self._snapshot = None
+        if self._snapshots:
+            for snapshot in self._snapshots:
+                for state_id in snapshot:
+                    self._remove(state_id)
+        self._snapshots = []
 
     @sync
     @at_not_running
