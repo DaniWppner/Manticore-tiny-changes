@@ -10,6 +10,8 @@ from ..utils.helpers import PickleSerializer
 from ..utils import config
 from .plugin import StateDescriptor
 
+import time
+
 consts = config.get_group("core")
 consts.add(
     "execs_per_intermittent_cb",
@@ -463,8 +465,13 @@ class StateBase(Eventful):
         return self.can_be_true(True)
 
     def can_be_true(self, expr):
+        startAll = time.time()
         expr = self.migrate_expression(expr)
-        return self._solver.can_be_true(self._constraints, expr)
+        start = time.time()
+        res = self._solver.can_be_true(self._constraints, expr)
+        print(f"(level 1.1) took {time.time()- start} seconds")
+        print(f"(level 2.1) took {time.time()- startAll} seconds")
+        return res
 
     def can_be_false(self, expr):
         expr = self.migrate_expression(expr)
@@ -503,10 +510,13 @@ class StateBase(Eventful):
         :param bool constrain: If True, constrain expr to solved solution value
         :return: List of concrete value or a tuple of concrete values
         """
+        startAll=time.time()
         # Return ret instead of value, to allow the bytearray/bytes conversion
         ret = []
         exprs = [self.migrate_expression(x) for x in exprs]
+        start = time.time()
         values = self._solver.get_value_in_batch(self._constraints, exprs)
+        print(f"(level 1.2) took {time.time()- start} seconds")
         assert len(values) == len(exprs)
         for idx, expr in enumerate(exprs):
             value = values[idx]
@@ -516,6 +526,7 @@ class StateBase(Eventful):
             if isinstance(value, bytearray):
                 value = bytes(value)
             ret.append(value)
+        print(f"level(2.2) took {time.time()-startAll} seconds")
         return ret
 
     def solve_n(self, expr, nsolves):

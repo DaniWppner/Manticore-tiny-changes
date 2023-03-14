@@ -408,6 +408,7 @@ class SMTLIBSolver(Solver):
         status = self._smtlib.recv()
         assert status is not None
         logger.debug("Check took %s seconds (%s)", time.time() - start, status)
+        print(f"(level 0) took {time.time()- start} seconds ({status})")
         if "ALARM TRIGGERED" in status:
             return False
 

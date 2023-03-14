@@ -1588,7 +1588,11 @@ class ManticoreEVM(ManticoreBase):
             with state as temp_state:
                 if only_if is not None:
                     temp_state.constrain(only_if)
-                return self._generate_testcase_ex(temp_state, message, name=name)
+                start = time.time()
+                res = self._generate_testcase_ex(temp_state, message, name=name)
+                print(f"(level 3) took {time.time()- start} seconds")
+                return res 
+                
         except ManticoreError:
             return None
 
@@ -1675,7 +1679,6 @@ class ManticoreEVM(ManticoreBase):
                     tx_summary.write(
                         "Transactions No. %d\n" % blockchain.transactions.index(sym_tx)
                     )
-
                     conc_tx = sym_tx.concretize(state)
                     txlist.append(conc_tx.to_dict(self))
 
