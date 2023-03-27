@@ -460,11 +460,13 @@ class SMTLIBSolver(Solver):
         return {"true": True, "false": False, "#b0": False, "#b1": True}[ret[2:-2].split(" ")[1]]
 
     def __getvalue_all(self, expressions_str: List[str], is_bv: List[bool]) -> Dict[str, int]:
+        start = time.time()
         all_expressions_str = " ".join(expressions_str)
         self._smtlib.send(f"(get-value ({all_expressions_str}))")
         ret_solver: Optional[str] = self._smtlib.recv()
         assert ret_solver is not None
         return_values = re.findall(RE_GET_EXPR_VALUE_ALL, ret_solver)
+        print(f"(level _getvalue_all) took {time.time()- start} seconds")
         return {value[0]: _convert(value[1]) for value in return_values}
 
     def _getvalue(self, expression) -> Union[int, bool, bytes]:
@@ -478,16 +480,23 @@ class SMTLIBSolver(Solver):
             return expression
 
         if isinstance(expression, Array):
+            start = time.time()
             result = bytearray()
             for c in expression:
                 expression_str = translate_to_smtlib(c)
                 result.append(self.__getvalue_bv(expression_str))
+            print(f"(level _getvalue) took {time.time()- start} seconds")
             return bytes(result)
         else:
+            start = time.time()
             if isinstance(expression, BoolVariable):
-                return self.__getvalue_bool(expression.name)
+                result = self.__getvalue_bool(expression.name)
+                print(f"(level _getvalue) took {time.time()- start} seconds")
+                return result
             elif isinstance(expression, BitVecVariable):
-                return self.__getvalue_bv(expression.name)
+                result = self.__getvalue_bv(expression.name)
+                print(f"(level _getvalue) took {time.time()- start} seconds")
+                return result
 
         raise NotImplementedError(
             f"_getvalue only implemented for Bool, BitVec and Array. Got {type(expression)}"

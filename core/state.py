@@ -526,7 +526,7 @@ class StateBase(Eventful):
             if isinstance(value, bytearray):
                 value = bytes(value)
             ret.append(value)
-        print(f"level(2.2) took {time.time()-startAll} seconds")
+        print(f"(level 2.2) took {time.time()-startAll} seconds")
         return ret
 
     def solve_n(self, expr, nsolves):
