@@ -469,8 +469,8 @@ class StateBase(Eventful):
         expr = self.migrate_expression(expr)
         start = time.time()
         res = self._solver.can_be_true(self._constraints, expr)
-        print(f"(level 1.1) took {time.time()- start} seconds")
-        print(f"(level 2.1) took {time.time()- startAll} seconds")
+        print(f"(level solver.can_be_true) took {time.time()- start} seconds")
+        print(f"(level state.can_be_true) took {time.time()- startAll} seconds")
         return res
 
     def can_be_false(self, expr):
@@ -516,7 +516,7 @@ class StateBase(Eventful):
         exprs = [self.migrate_expression(x) for x in exprs]
         start = time.time()
         values = self._solver.get_value_in_batch(self._constraints, exprs)
-        print(f"(level 1.2) took {time.time()- start} seconds")
+        print(f"(level get_value_in_batch) took {time.time()- start} seconds")
         assert len(values) == len(exprs)
         for idx, expr in enumerate(exprs):
             value = values[idx]
@@ -526,7 +526,7 @@ class StateBase(Eventful):
             if isinstance(value, bytearray):
                 value = bytes(value)
             ret.append(value)
-        print(f"(level 2.2) took {time.time()-startAll} seconds")
+        print(f"(level solve_one_n_batched) took {time.time()-startAll} seconds")
         return ret
 
     def solve_n(self, expr, nsolves):

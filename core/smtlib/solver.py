@@ -408,7 +408,7 @@ class SMTLIBSolver(Solver):
         status = self._smtlib.recv()
         assert status is not None
         logger.debug("Check took %s seconds (%s)", time.time() - start, status)
-        print(f"(level 0) took {time.time()- start} seconds ({status})")
+        print(f"(level _is_sat_z3_call) took {time.time()- start} seconds ({status})")
         if "ALARM TRIGGERED" in status:
             return False
 
@@ -464,9 +464,10 @@ class SMTLIBSolver(Solver):
         all_expressions_str = " ".join(expressions_str)
         self._smtlib.send(f"(get-value ({all_expressions_str}))")
         ret_solver: Optional[str] = self._smtlib.recv()
+        print(f"(level _getvalue_all_z3_call) took {time.time()- start} seconds")
         assert ret_solver is not None
         return_values = re.findall(RE_GET_EXPR_VALUE_ALL, ret_solver)
-        print(f"(level _getvalue_all) took {time.time()- start} seconds")
+
         return {value[0]: _convert(value[1]) for value in return_values}
 
     def _getvalue(self, expression) -> Union[int, bool, bytes]:
@@ -485,17 +486,17 @@ class SMTLIBSolver(Solver):
             for c in expression:
                 expression_str = translate_to_smtlib(c)
                 result.append(self.__getvalue_bv(expression_str))
-            print(f"(level _getvalue) took {time.time()- start} seconds")
+            print(f"(level _getvalue_z3_call) took {time.time()- start} seconds")
             return bytes(result)
         else:
             start = time.time()
             if isinstance(expression, BoolVariable):
                 result = self.__getvalue_bool(expression.name)
-                print(f"(level _getvalue) took {time.time()- start} seconds")
+                print(f"(level _getvalue_z3_call) took {time.time()- start} seconds")
                 return result
             elif isinstance(expression, BitVecVariable):
                 result = self.__getvalue_bv(expression.name)
-                print(f"(level _getvalue) took {time.time()- start} seconds")
+                print(f"(level _getvalue_z3_call) took {time.time()- start} seconds")
                 return result
 
         raise NotImplementedError(
@@ -775,8 +776,10 @@ class SMTLIBSolver(Solver):
 
             if values_to_ask == []:
                 return values
-
+            start = time.time()
             values_returned = self.__getvalue_all(values_to_ask, is_bv)
+            print(f"(level _getvalue_all) took {time.time()- start} seconds)")
+
             for idx, expression in enumerate(expressions):
                 if not issymbolic(expression):
                     continue
