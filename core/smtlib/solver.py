@@ -776,9 +776,9 @@ class SMTLIBSolver(Solver):
 
             if values_to_ask == []:
                 return values
-            start = time.time()
+            debug_start = time.time()
             values_returned = self.__getvalue_all(values_to_ask, is_bv)
-            print(f"(level _getvalue_all) took {time.time()- start} seconds)")
+            print(f"(level _getvalue_all) took {time.time()- debug_start} seconds)")
 
             for idx, expression in enumerate(expressions):
                 if not issymbolic(expression):
